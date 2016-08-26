@@ -7,10 +7,9 @@ from rest_framework.serializers import BaseSerializer
 
 class ApiNode(object):
 
-    def __init__(self, pattern, parent_node=None, drf_router=None):
+    def __init__(self, pattern, parent_node=None):
         self.pattern = pattern
         self.parent_node = parent_node
-        self.drf_router = drf_router
 
     @property
     def parent_pattern(self):
@@ -63,12 +62,8 @@ class ApiNode(object):
 
 class ApiEndpoint(ApiNode):
 
-    def __init__(self, pattern, parent_node=None, drf_router=None):
-        super(ApiEndpoint, self).__init__(
-            pattern,
-            parent_node=parent_node,
-            drf_router=drf_router
-        )
+    def __init__(self, pattern, parent_node=None):
+        super(ApiEndpoint, self).__init__(pattern, parent_node=parent_node)
         self.callback = pattern.callback
         self.docstring = self.__get_docstring__()
         self.allowed_methods = self.__get_allowed_methods__()
@@ -80,6 +75,10 @@ class ApiEndpoint(ApiNode):
             self.fields_json = self.__get_serializer_fields_json__()
 
         self.permissions = self.__get_permissions_class__()
+
+    @property
+    def drf_router(self):
+        return getattr(self.pattern, "router", None)
 
     def __get_allowed_methods__(self):
         viewset_methods = []
